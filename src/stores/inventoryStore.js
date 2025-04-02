@@ -1,4 +1,10 @@
-import { initDB, loadData, saveData } from "@/utils/db";
+import {
+  initDB,
+  loadData,
+  saveData,
+  saveToIndexedDB,
+  loadFromIndexedDB,
+} from "@/utils/db";
 import { defineStore } from "pinia";
 import { ref } from "vue";
 
@@ -8,23 +14,30 @@ export const useInventoryStore = defineStore("inventory", () => {
   const rows = ref([]);
 
   // Save data to localStorage
-  const saveToLocalStorage = (data) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  const saveToIndexedDBStore = async () => {
+    try {
+      await saveToIndexedDB();
+      console.log("Data saved to IndexedDB");
+    } catch (error) {
+      console.error("Error saving data to IndexedDB", error);
+    }
   };
 
   //load from local storage
-  const loadFromLocalStorage = () => {
-    const savedData = localStorage.getItem(STORAGE_KEY);
-    if (savedData) {
-      rows.value = JSON.parse(savedData);
+  const loadFromIndexedDBStore = async () => {
+    try {
+      await loadFromIndexedDB();
+      rows.value = loadData();
+      console.log("Data loaded from IndexedDB.");
+    } catch (error) {
+      console.error("Error loading data from IndexedDB:", error);
     }
-    return [];
   };
 
   const initialize = async () => {
     try {
       await initDB();
-      loadFromLocalStorage();
+      await loadFromIndexedDBStore();
 
       if (rows.value.length === 0) {
         rows.value = loadData();
@@ -36,22 +49,22 @@ export const useInventoryStore = defineStore("inventory", () => {
   //add row
   const addRow = (row) => {
     rows.value.push(row);
-    //saveData([row]);
-    saveToLocalStorage(rows.value);
+
+    saveData(rows.value);
   };
 
   //update
   const updateRow = (index, updatedRow) => {
     rows.value[index] = updatedRow;
-    //saveData(rows.value);
-    saveToLocalStorage(rows.value);
+
+    saveData(rows.value);
   };
 
   //delete
   const deleteRow = (index) => {
     rows.value.splice(index, 1);
-    //saveData(rows.value);
-    saveToLocalStorage(rows.value);
+
+    saveData(rows.value);
   };
 
   const resetAllRows = () => {
@@ -60,13 +73,13 @@ export const useInventoryStore = defineStore("inventory", () => {
       row.beg = 0;
     });
 
-    saveToLocalStorage(rows.value);
+    saveData(rows.value);
   };
 
   return {
     rows,
-    saveToLocalStorage,
-    loadFromLocalStorage,
+    saveToIndexedDBStore,
+    loadFromIndexedDBStore,
     initialize,
     addRow,
     updateRow,

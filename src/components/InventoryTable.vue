@@ -113,7 +113,14 @@ import { ref, onMounted, computed } from "vue";
 
 const store = useInventoryStore();
 const { rows } = storeToRefs(store);
-const { addRow, updateRow, deleteRow, resetAllRows } = store;
+const {
+  addRow,
+  updateRow,
+  deleteRow,
+  resetAllRows,
+  saveToIndexedDBStore,
+  loadFromIndexedDBStore,
+} = store;
 
 onMounted(async () => {
   try {
