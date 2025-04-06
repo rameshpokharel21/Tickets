@@ -1,4 +1,5 @@
 {
+  "main": "electron/main.js",
   "name": "tickets",
   "version": "0.0.0",
   "private": true,
@@ -6,7 +7,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "electron": "electron ./electron/main.js",
+    "main": "electron/main.js",
+    "electron-dev": "vite build && electron ./electron/main.js",
+    "dist": " vite build && electron-builder"
   },
   "dependencies": {
     "localforage": "^1.10.0",
@@ -16,8 +21,31 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "electron": "^35.1.3",
+    "electron-builder": "^26.0.12",
     "vite": "^6.1.0",
     "vite-plugin-pwa": "^0.21.2",
+    "vite-plugin-static-copy": "^2.3.0",
     "vite-plugin-vue-devtools": "^7.7.2"
+  },
+  "build": {
+    "appId": "com.example.tickets",
+    "productName": "TicketsApp",
+    "directories": {
+      "output": "dist/electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "deb"
+    }
   }
 }

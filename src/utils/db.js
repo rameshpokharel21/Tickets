@@ -7,9 +7,14 @@ let SQL;
 export const initDB = async () => {
   if (!SQL) {
     SQL = await initSqlJs({
-      locateFile: (file) => `https://sql.js.org/dist/${file}`,
+      //locateFile: (file) => `https://sql.js.org/dist/${file}`,
+
+      locateFile: (file) => `./sql-wasm.wasm`,
     });
   }
+
+  console.log("SQL.js initialized successfully:", SQL);
+
   console.log(localforage);
   const savedDB = await localforage.getItem("sqlite_db");
 
@@ -122,6 +127,8 @@ export const saveToFile = async () => {
     a.click();
 
     URL.revokeObjectURL(url);
+
+    await window.electronAPI.saveFile(data);
   } catch (error) {
     console.error("Failed to save file: ", error);
   }
