@@ -1,4 +1,5 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, dialog } from "electron";
+import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -19,6 +20,52 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js"),
     },
   });
+
+  // Add a custom application menu
+  const menuTemplate = [
+    {
+      label: "File",
+      submenu: [
+        {
+          label: "Print",
+          click: () => {
+            if (win) {
+              win.webContents.print(); // Opens the print dialog
+            }
+          },
+        },
+        {
+          label: "Save as PDF",
+          click: async () => {
+            if (win) {
+              const pdfPath = await dialog.showSaveDialog({
+                title: "Save as PDF",
+                defaultPath: "output.pdf",
+                filters: [{ name: "PDF Files", extensions: ["pdf"] }],
+              });
+
+              if (!pdfPath.canceled) {
+                win.webContents
+                  .printToPDF({})
+                  .then((data) => {
+                    fs.writeFileSync(pdfPath.filePath, data);
+                    console.log("PDF Saved at:", pdfPath.filePath);
+                  })
+                  .catch((err) => console.error("Failed to save PDF:", err));
+              }
+            }
+          },
+        },
+        {
+          label: "Quit",
+          role: "quit",
+        },
+      ],
+    },
+  ];
+
+  const menu = Menu.buildFromTemplate(menuTemplate);
+  Menu.setApplicationMenu(menu); // Apply the custom menu
 
   const startUrl =
     process.env.NODE_ENV === "development"
